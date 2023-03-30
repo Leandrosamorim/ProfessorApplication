@@ -18,12 +18,12 @@ namespace Domain.ProfessorNS.Service
     {
         private readonly IProfessorRepository _professorRepository;
         private readonly IConfiguration _configuration;
-        private readonly IQueueService _queueService;
-        public ProfessorService(IProfessorRepository professorRepository, IQueueService queueService, IConfiguration configuration)
+        //private readonly IQueueService _queueService;
+        public ProfessorService(IProfessorRepository professorRepository,/* IQueueService queueService, */IConfiguration configuration)
         {
             _professorRepository = professorRepository;
             _configuration = configuration;
-            _queueService = queueService;
+            //_queueService = queueService;
         }
 
         public async Task<List<Aluno>> BuscarAlunosPorProfessor(int professorId)
@@ -82,11 +82,11 @@ namespace Domain.ProfessorNS.Service
             }
         }
 
-        public async void NotificarProfessor()
-        {
-            var entrega = _queueService.Consume();
-            //todo
-        }
+        //public async void NotificarProfessor()
+        //{
+        //    var entrega = _queueService.Consume();
+        //    //todo
+        //}
 
 
     }

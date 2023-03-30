@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Metrics": {
+      "commandName": "Project"
+    },
+    "Docker": {
+      "commandName": "Docker"
+    }
+  }
+}

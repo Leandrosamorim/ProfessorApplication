@@ -35,7 +35,7 @@ namespace IoC
             services.AddScoped<IAtrasoService, AtrasoService>();
             services.AddScoped<IFaltaService, FaltaService>();
             services.AddScoped<IAvaliacaoService, AvaliacaoService>();
-            services.AddScoped<IQueueService, QueueService>();
+            //services.AddScoped<IQueueService, QueueService>();
             return services;
         }
     }

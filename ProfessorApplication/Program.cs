@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using Prometheus;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,7 +16,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddRouting();
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddHealthChecks().ForwardToPrometheus();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "ProfessorApplication-API", Version = "v1" });
@@ -44,6 +47,7 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
@@ -64,13 +68,17 @@ builder.Services.AddHangfire(configuration =>
     configuration.UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 var app = builder.Build();
+var customMetric = Metrics.CreateGauge("custom_metric1", "Custom metric 1");
+customMetric.Set(42);
+var customMetric2 = Metrics.CreateCounter("custommetric2", "Custom metric 2");
+customMetric2.Inc(1);
 
-app.UseHangfireDashboard("/dash");
-app.UseHangfireServer();
-var queueService = new QueueService();
-app.MapGet("/consume", () => queueService.Consume());
-var manager = new RecurringJobManager();
-manager.AddOrUpdate("consume", Job.FromExpression(() => queueService.Consume()), Cron.Minutely());
+//app.UseHangfireDashboard("/dash");
+//app.UseHangfireServer();
+//var queueService = new QueueService();
+//app.MapGet("/consume", () => queueService.Consume());
+//var manager = new RecurringJobManager();
+//manager.AddOrUpdate("consume", Job.FromExpression(() => queueService.Consume()), Cron.Minutely());
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -78,10 +86,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-app.UseHttpsRedirection();
+app.UseMetricServer();
+app.UseHttpMetrics();
 app.UseAuthentication();
 app.UseAuthorization();
+
 
 app.MapControllers();
 
